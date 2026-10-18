@@ -1,5 +1,5 @@
 import { html, useState } from '../../vendor/preact-htm.js';
-import { PLACE_TYPES, addPlace, deletePlace, extractUrl, placeTypeOf, updatePlace } from '../places.js';
+import { PLACE_TYPES, addPlace, deletePlace, extractUrl, placeTypeOf, safeUrl, updatePlace } from '../places.js';
 import { ROLES, partnerOf } from '../roles.js';
 
 const WANTS = (me) => [
@@ -33,7 +33,7 @@ export function PlacesScreen({ me, places, shared, onSharedUsed }) {
           <small>${[p.area && `📍 ${p.area}`, t.label, wantsText(p.wants)].filter(Boolean).join(' · ')}</small>
           ${p.note && html`<small>${p.note}</small>`}
         </button>
-        ${p.ig_url && html`<a class="place-ig" href=${p.ig_url} target="_blank" rel="noopener">▶ IG</a>`}
+        ${safeUrl(p.ig_url) && html`<a class="place-ig" href=${safeUrl(p.ig_url)} target="_blank" rel="noopener">▶ IG</a>`}
       </div>`;
   };
 
@@ -88,7 +88,7 @@ function PlaceForm({ me, place, areas, onClose }) {
   function save(e) {
     e.preventDefault();
     if (!f.name.trim()) return setError('請輸入店名');
-    const data = { ...f, name: f.name.trim(), area: f.area.trim(), ig_url: extractUrl(f.ig_url) || f.ig_url.trim(), note: f.note.trim() };
+    const data = { ...f, name: f.name.trim(), area: f.area.trim(), ig_url: extractUrl(f.ig_url), note: f.note.trim() };
     (isNew ? addPlace(data, me) : updatePlace(place.id, data)).catch(() => {});
     onClose();
   }
@@ -109,7 +109,7 @@ function PlaceForm({ me, place, areas, onClose }) {
             <button type="button" class="chip-btn" style="flex:none" onClick=${paste}>📋 貼上</button>
           </div>
         </label>
-        ${f.ig_url && html`<a class="link" href=${extractUrl(f.ig_url) || f.ig_url} target="_blank" rel="noopener">▶ 打開 IG 看一下店名</a>`}
+        ${extractUrl(f.ig_url) && html`<a class="link" href=${extractUrl(f.ig_url)} target="_blank" rel="noopener">▶ 打開 IG 看一下店名</a>`}
         <label>店名<input value=${f.name} onInput=${set('name')} placeholder="例如：○○拉麵" /></label>
         <label>地區
           <input value=${f.area} onInput=${set('area')} list="areas" placeholder="例如：高雄左營" />

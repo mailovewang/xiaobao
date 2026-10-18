@@ -23,8 +23,18 @@ export async function addPlace(data, me) {
 export const updatePlace = (id, data) => fs.updateDoc(fs.doc(col(), id), data);
 export const deletePlace = (id) => fs.deleteDoc(fs.doc(col(), id));
 
+/** 只接受 http(s) 網址，其他（例如 javascript:）一律當作沒有，避免點連結時執行奇怪的程式 */
+export function safeUrl(u) {
+  try {
+    const x = new URL(u);
+    return x.protocol === 'https:' || x.protocol === 'http:' ? x.href : '';
+  } catch {
+    return '';
+  }
+}
+
 /** 從分享或貼上的文字裡找出網址（IG 分享常是「看看這個 https://www.instagram.com/reel/...」） */
 export function extractUrl(text) {
   const m = (text || '').match(/https?:\/\/[^\s]+/);
-  return m ? m[0] : '';
+  return m ? safeUrl(m[0]) : '';
 }

@@ -49,7 +49,7 @@ function Main({ me, onSwitchRole }) {
   // 從 IG 分享進來：切到「想去」並打開新增表單
   const [shared, setShared] = useState('');
   useEffect(() => onShared((text) => {
-    setShared(extractUrl(text) || text);
+    setShared(extractUrl(text));
     setTab('places');
   }), []);
 
