@@ -9,6 +9,32 @@
 </head>
 <body>
   <div id="app"></div>
+  <script>
+    // App 啟動失敗時顯示錯誤，不要整片空白（方便截圖回報）
+    (function () {
+      var errors = [];
+      function show() {
+        var app = document.getElementById('app');
+        if (!app || app.childElementCount > 0) return;
+        app.innerHTML =
+          '<div class="center"><div class="big-emoji">😵</div>' +
+          '<h1 class="title">App 打不開</h1>' +
+          '<p class="hint">請截圖這個畫面給麥麥</p>' +
+          '<pre class="crash"></pre>' +
+          '<button class="btn" onclick="location.reload()">重新載入</button></div>';
+        app.querySelector('.crash').textContent = errors.join('\n') || '載入太久（可能沒網路）';
+      }
+      window.addEventListener('error', function (e) {
+        errors.push((e.message || '載入失敗') + (e.filename ? ' @' + e.filename.split('/').pop() + ':' + e.lineno : ''));
+        setTimeout(show, 300);
+      });
+      window.addEventListener('unhandledrejection', function (e) {
+        errors.push(String(e.reason && (e.reason.stack || e.reason.message) || e.reason));
+        setTimeout(show, 300);
+      });
+      setTimeout(show, 15000);
+    })();
+  </script>
   <script type="module" src="js/app.js"></script>
 </body>
 </html>

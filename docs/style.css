@@ -337,3 +337,4 @@ h2.day-title { font-size: 18px; margin: 8px 0 0; }
 a.link { text-decoration: none; }
 .nav button { font-size: 11px; }
 .place.visited { opacity: .6; }
+.crash { white-space: pre-wrap; text-align: left; font-size: 12px; background: var(--card); padding: 12px; border-radius: 12px; max-width: 100%; overflow: auto; }
