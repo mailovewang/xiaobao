@@ -1,0 +1,13 @@
+{
+  "appId": "com.maimai.xiaobao",
+  "appName": "小寶",
+  "webDir": "docs",
+  "backgroundColor": "#fff7fa",
+  "server": {
+    "url": "https://mailovewang.github.io/xiaobao/",
+    "cleartext": false
+  },
+  "android": {
+    "allowMixedContent": false
+  }
+}

@@ -1,0 +1,26 @@
+# Android
+.gradle/
+build/
+local.properties
+.idea/
+*.iml
+captures/
+.kotlin/
+
+# Firebase
+node_modules/
+firebase/functions/lib/
+.firebase/
+firebase-debug.log
+
+# 金鑰：另外備份，不進版本控制
+*.jks
+*.keystore
+keystore.properties
+
+# 打包好的 APK
+apk/
+
+# Capacitor
+android/app/build/
+android/capacitor-cordova-android-plugins/build/

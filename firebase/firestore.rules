@@ -1,0 +1,28 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // 這支手機（匿名帳號）輸入過正確暗號了嗎？
+    function joined() {
+      return request.auth != null
+        && exists(/databases/$(database)/documents/spaces/home/devices/$(request.auth.uid));
+    }
+
+    // 暗號放在這裡，App 讀不到也改不了（只能從 Firebase Console 或管理工具改）
+    match /config/{doc} {
+      allow read, write: if false;
+    }
+
+    // 輸入暗號：只能替自己的帳號建立，而且暗號要對
+    match /spaces/home/devices/{uid} {
+      allow read: if request.auth != null && request.auth.uid == uid;
+      allow create, update: if request.auth != null && request.auth.uid == uid
+        && request.resource.data.code == get(/databases/$(database)/documents/config/secret).data.code;
+    }
+
+    // 其他所有資料：輸入過暗號的手機才能讀寫
+    match /spaces/home/{document=**} {
+      allow read, write: if joined();
+    }
+  }
+}

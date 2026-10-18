@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "1188882177",
+    "project_id": "maimai-xiaobao-app",
+    "storage_bucket": "maimai-xiaobao-app.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1188882177:android:c2e77c7bc671f3967d5d00",
+        "android_client_info": {
+          "package_name": "com.maimai.xiaobao"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCDORLbjVL8582-BDOmrd2S7hCHSU5imxY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
