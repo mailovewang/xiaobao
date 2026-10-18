@@ -102,7 +102,7 @@ function EventForm({ me, ev, defaultDate, onClose }) {
   });
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
-  const set = (k) => (e) => setF({ ...f, [k]: e.target.type === 'checkbox' ? e.target.checked : e.target.value });
+  const set = (k) => (e) => { const v = e.target.type === 'checkbox' ? e.target.checked : e.target.value; setF((p) => ({ ...p, [k]: v })); };
 
   async function save(e) {
     e.preventDefault();
@@ -139,8 +139,8 @@ function EventForm({ me, ev, defaultDate, onClose }) {
 
         ${isNew && html`
           <div class="segmented">
-            <button type="button" class=${f.type === 'event' ? 'on' : ''} onClick=${() => setF({ ...f, type: 'event' })}>📅 行程</button>
-            <button type="button" class=${f.type === 'anniversary' ? 'on' : ''} onClick=${() => setF({ ...f, type: 'anniversary' })}>❤️ 紀念日</button>
+            <button type="button" class=${f.type === 'event' ? 'on' : ''} onClick=${() => setF((p) => ({ ...p, type: 'event' }))}>📅 行程</button>
+            <button type="button" class=${f.type === 'anniversary' ? 'on' : ''} onClick=${() => setF((p) => ({ ...p, type: 'anniversary' }))}>❤️ 紀念日</button>
           </div>`}
 
         <fieldset disabled=${readOnly || busy}>

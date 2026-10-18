@@ -229,3 +229,35 @@ h2.day-title { font-size: 18px; margin: 8px 0 0; }
 .segmented { display: flex; background: var(--line); border-radius: 12px; padding: 4px; }
 .segmented button { flex: 1; border: none; background: none; border-radius: 10px; padding: 10px; font-size: 16px; color: var(--muted); }
 .segmented button.on { background: var(--card); color: var(--text); font-weight: 700; }
+
+/* 課表 */
+.tt { display: grid; gap: 0 3px; background: var(--card); border-radius: 16px; padding: 8px 6px; }
+.tt-head { text-align: center; font-size: 13px; color: var(--muted); padding: 4px 0 6px; }
+.tt-head.today { color: var(--xiaobao); font-weight: 700; }
+.tt-hours div { font-size: 11px; color: var(--muted); text-align: right; padding-right: 4px; transform: translateY(-6px); }
+.tt-col {
+  position: relative; border-radius: 8px;
+  background-image: linear-gradient(to bottom, var(--line) 1px, transparent 1px);
+}
+.tt-col.today { background-color: #fff3f7; }
+.tt-course {
+  position: absolute; left: 1px; right: 1px; border: none; border-radius: 8px;
+  padding: 4px; overflow: hidden; text-align: left; color: #33272a; font-size: 12px; line-height: 1.25;
+}
+.tt-course b { display: block; font-size: 12px; }
+.tt-course small { display: block; font-size: 11px; opacity: .75; }
+
+.field-label { font-size: 14px; color: var(--muted); margin-bottom: 4px; }
+.chips { display: flex; gap: 6px; }
+.chips button {
+  flex: 1; border: 2px solid var(--line); background: var(--card); border-radius: 10px;
+  padding: 8px 0; font-size: 15px; color: var(--text);
+}
+.chips button.on { border-color: var(--xiaobao); background: #ffe3ec; font-weight: 700; }
+.swatches { display: flex; gap: 10px; flex-wrap: wrap; }
+.swatches button { width: 34px; height: 34px; border-radius: 50%; border: 3px solid transparent; }
+.swatches button.on { border-color: var(--text); }
+
+.today-courses { display: flex; flex-direction: column; gap: 6px; }
+.today-course { display: flex; gap: 10px; align-items: center; font-size: 14px; }
+.today-course i { width: 10px; height: 10px; border-radius: 3px; display: block; }

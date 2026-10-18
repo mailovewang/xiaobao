@@ -4,6 +4,8 @@ import { setupPush } from './push.js';
 import { observeEvents, observeSettings, withRelationship } from './events.js';
 import { syncReminders } from './reminders.js';
 import { CalendarScreen } from './screens/calendar.js';
+import { observeCourses } from './courses.js';
+import { TimetableScreen } from './screens/timetable.js';
 import { loadRole, saveRole, partnerOf } from './roles.js';
 import { JoinScreen, RoleScreen } from './screens/setup.js';
 import { HomeScreen } from './screens/home.js';
@@ -31,15 +33,17 @@ function Main({ me, onSwitchRole }) {
   }, [me]);
   useEffect(() => observeEvents(setRawEvents), []);
   useEffect(() => observeSettings(setSettings), []);
+  const [courses, setCourses] = useState([]);
+  useEffect(() => observeCourses(setCourses), []);
 
   const events = useMemo(() => withRelationship(rawEvents, settings), [rawEvents, settings]);
   // 行程一有變動就重排這支手機的提醒
   useEffect(() => { syncReminders(events, me).catch(() => {}); }, [events, me]);
 
   return html`
-    ${tab === 'home' && html`<${HomeScreen} me=${me} pushState=${pushState} events=${events} settings=${settings} onOpenTab=${setTab} />`}
+    ${tab === 'home' && html`<${HomeScreen} me=${me} pushState=${pushState} events=${events} courses=${courses} settings=${settings} onOpenTab=${setTab} />`}
     ${tab === 'calendar' && html`<${CalendarScreen} me=${me} events=${events} />`}
-    ${tab === 'timetable' && html`<${ComingSoon} name="課表" step="第 4 步" />`}
+    ${tab === 'timetable' && html`<${TimetableScreen} me=${me} courses=${courses} />`}
     ${tab === 'todo' && html`<${ComingSoon} name="待辦" step="第 5 步" />`}
     ${tab === 'more' && html`<${MoreScreen} me=${me} settings=${settings} onSwitchRole=${onSwitchRole} />`}
     <nav class="nav">

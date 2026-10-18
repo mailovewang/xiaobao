@@ -3,6 +3,7 @@ import { observeMembers, sendPing } from '../firebase.js';
 import { daysBetween, nextOccurrence, todayStr } from '../dates.js';
 import { ROLES, partnerOf } from '../roles.js';
 import { EventLine, itemsOn } from './calendar.js';
+import { coursesOn, todayWeekday } from '../courses.js';
 
 const PUSH_TEXT = {
   denied: '🔕 通知被關掉了，請到手機設定 → 應用程式 → 小寶 → 通知 打開',
@@ -18,7 +19,8 @@ function nextAnniversary(events, today) {
     .sort((a, b) => a.next.date.localeCompare(b.next.date))[0];
 }
 
-export function HomeScreen({ me, pushState, events, settings, onOpenTab }) {
+export function HomeScreen({ me, pushState, events, courses, settings, onOpenTab }) {
+  const weekday = todayWeekday();
   const [members, setMembers] = useState({});
   const [sent, setSent] = useState('');
   useEffect(() => observeMembers(setMembers), []);
@@ -59,6 +61,19 @@ export function HomeScreen({ me, pushState, events, settings, onOpenTab }) {
       <h2 class="day-title">今天</h2>
       ${todayItems.length === 0 && html`<p class="hint">今天沒有安排</p>`}
       ${todayItems.map((ev) => html`<${EventLine} ev=${ev} dateStr=${today} onClick=${() => onOpenTab('calendar')} />`)}
+
+      ${Object.values(ROLES).some((r) => coursesOn(courses, r.id, weekday).length) && html`
+        <h2 class="day-title">今天的課</h2>
+        <div class="card today-courses">
+          ${Object.values(ROLES).map((r) => {
+            const list = coursesOn(courses, r.id, weekday);
+            return list.length > 0 && html`
+              <div class="card-title">${r.name}</div>
+              ${list.map((c) => html`
+                <div class="today-course"><i style=${`background:${c.color}`}></i>${c.start_time}–${c.end_time} ${c.name}${c.location ? ` · ${c.location}` : ''}</div>
+              `)}`;
+          })}
+        </div>`}
 
       <button class="btn ${partner.id}" style="max-width:none;margin-top:8px" onClick=${ping}>💌 傳一顆愛心給${partner.name}</button>
       ${sent && html`<p class="hint" style="text-align:center">${sent}</p>`}
