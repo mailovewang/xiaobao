@@ -285,3 +285,38 @@ h2.day-title { font-size: 18px; margin: 8px 0 0; }
 .todo-body small { display: block; font-size: 13px; color: var(--muted); margin-top: 2px; }
 .todo-line.done .todo-body { color: var(--muted); text-decoration: line-through; }
 .late { color: #d32f2f; font-weight: 700; }
+
+/* PIN 鍵盤 */
+.pin { display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 24px 16px; text-align: center; }
+.pin h2 { margin: 0; font-size: 20px; }
+.pin .hint { margin: 0; }
+.pin-dots { display: flex; gap: 16px; margin-top: 12px; }
+.pin-dots i { width: 16px; height: 16px; border-radius: 50%; border: 2px solid var(--xiaobao); display: block; }
+.pin-dots i.on { background: var(--xiaobao); }
+.pin-pad { display: grid; grid-template-columns: repeat(3, 72px); gap: 14px; }
+.pin-pad button {
+  width: 72px; height: 72px; border-radius: 50%; border: none; background: var(--card);
+  font-size: 26px; color: var(--text); box-shadow: 0 1px 3px rgba(0, 0, 0, .08);
+}
+.pin-pad button:active { background: #ffe3ec; }
+
+/* 子頁面（記帳、私密清單）上方的返回列 */
+.subpage-bar { display: flex; align-items: center; gap: 8px; padding: calc(env(safe-area-inset-top) + 12px) 16px 0; }
+.subpage-bar h1 { margin: 0; font-size: 22px; }
+.subpage-bar + .page { padding-top: 12px; }
+
+/* 記帳 */
+.ledger-sum { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+.ledger-sum > div { background: var(--card); border-radius: 14px; padding: 12px 8px; text-align: center; }
+.ledger-sum small { display: block; color: var(--muted); font-size: 12px; }
+.ledger-sum b { font-size: 17px; }
+.out { color: #d32f2f; }
+.in { color: #2e7d32; }
+.cat-row { display: grid; grid-template-columns: 76px 1fr 72px; align-items: center; gap: 8px; font-size: 14px; padding: 4px 0; }
+.cat-bar { height: 8px; background: var(--line); border-radius: 4px; overflow: hidden; }
+.cat-bar i { display: block; height: 100%; background: var(--xiaobao); border-radius: 4px; }
+.cat-amt { text-align: right; color: var(--muted); }
+.ledger-item { display: flex !important; justify-content: space-between; align-items: center; gap: 8px; }
+.amount-input { font-size: 28px !important; font-weight: 700; }
+.chips.wrap { flex-wrap: wrap; }
+.chips.wrap button { flex: 0 0 auto; padding: 8px 12px; }
