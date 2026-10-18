@@ -62,12 +62,28 @@ export function savePushToken(roleId, token) {
   return fs.setDoc(fs.doc(db, 'spaces', 'home', 'members', roleId), { push_token: token }, { merge: true });
 }
 
-/** 傳一顆愛心給對方（雲端函式會推播給對方）。 */
-export function sendPing(fromRoleId) {
-  return fs.addDoc(fs.collection(db, 'spaces', 'home', 'pings'), {
+// 推播服務（Cloudflare Worker）。本機測試時用 wrangler dev 的位址
+const NOTIFY_URL = location.hostname === 'localhost'
+  ? 'http://localhost:8787'
+  : 'https://xiaobao-notify.maimai-xiaobao.workers.dev';
+
+/** 請推播服務通知對方「我新增了 collection/id」。失敗不影響資料本身。 */
+export async function notifyPartner(collection, id) {
+  const res = await fetch(NOTIFY_URL, {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${await auth.currentUser.getIdToken()}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify({ collection, id }),
+  });
+  return res.json();
+}
+
+/** 傳一顆愛心給對方。 */
+export async function sendPing(fromRoleId) {
+  const ref = await fs.addDoc(fs.collection(db, 'spaces', 'home', 'pings'), {
     created_by: fromRoleId,
     created_at: fs.serverTimestamp(),
   });
+  return notifyPartner('pings', ref.id);
 }
 
 /** 即時監聽誰已經加入。回傳取消監聽的函式。 */

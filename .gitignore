@@ -25,3 +25,8 @@ apk/
 android/app/build/
 android/capacitor-cordova-android-plugins/build/
 firebase/functions/node_modules/
+
+# 金鑰（不上傳）
+.secrets/
+.wrangler/
+worker/.dev.vars

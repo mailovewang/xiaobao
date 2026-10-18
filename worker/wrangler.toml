@@ -1,0 +1,5 @@
+name = "xiaobao-notify"
+main = "src/index.js"
+compatibility_date = "2025-09-01"
+
+# SERVICE_ACCOUNT（Firebase 服務帳戶金鑰）用 wrangler secret 設定，不放在這裡
