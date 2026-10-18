@@ -41,7 +41,7 @@
 | devices/{uid} | code、joined_at（輸入過暗號的手機） |
 | members/{role} | role（maimai／xiaobao）、uid、push_token、updated_at |
 | pings | created_by、created_at（傳愛心） |
-| events | type（event／anniversary）、owner（maimai／xiaobao／shared）、title、start_at、end_at、all_day、location、note、repeat_yearly、created_by、created_at、updated_at |
+| events | type（event／anniversary）、owner（maimai／xiaobao／shared）、title、date（YYYY-MM-DD）、all_day、start_time、end_time（HH:mm）、location、note、repeat_yearly、created_by、created_at、updated_at |
 | courses | owner、name、weekday、start_time、end_time、location、color |
 | todos | title、note、created_by、assignee、remind_at、done、done_at、created_at |
 | expenses | owner、kind（expense／income）、amount、category、date、note、created_at |
@@ -54,4 +54,4 @@
 1. 暗號 2. 選擇身分 3. 首頁（交往第 N 天、下個紀念日倒數、今日行程、今日課、未完成待辦、傳愛心） 4. 日曆 5. 新增／編輯行程或紀念日 6. 課表 7. 新增／編輯課程 8. 待辦列表 9. 新增／編輯待辦 10. 更多 11. PIN 輸入 12. 記帳列表 13. 新增／編輯記帳 14. 私密清單 15. 設定（切換身分、交往起始日、PIN）
 
 ## 實作順序
-0. 環境 ✅ → 1. 暗號與選身分 ✅ → 2. 推播 ✅ → 3. 日曆 → 4. 課表 → 5. 待辦 → 6. 記帳＋PIN → 7. 私密清單
+0. 環境 ✅ → 1. 暗號與選身分 ✅ → 2. 推播 ✅ → 3. 日曆 ✅ → 4. 課表 → 5. 待辦 → 6. 記帳＋PIN → 7. 私密清單

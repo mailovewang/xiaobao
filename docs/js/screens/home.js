@@ -1,25 +1,33 @@
 import { html, useEffect, useState } from '../../vendor/preact-htm.js';
 import { observeMembers, sendPing } from '../firebase.js';
+import { daysBetween, nextOccurrence, todayStr } from '../dates.js';
 import { ROLES, partnerOf } from '../roles.js';
-
-const fmt = (ts) => {
-  if (!ts) return '';
-  const d = ts.toDate();
-  return `（${d.getMonth() + 1}/${d.getDate()} ${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}）`;
-};
+import { EventLine, itemsOn } from './calendar.js';
 
 const PUSH_TEXT = {
-  ok: '🔔 通知已開啟',
   denied: '🔕 通知被關掉了，請到手機設定 → 應用程式 → 小寶 → 通知 打開',
   web: '🌐 用瀏覽器開啟，收不到通知',
 };
 
-export function HomeScreen({ me, pushState }) {
+/** 最近的一個紀念日 */
+function nextAnniversary(events, today) {
+  return events
+    .filter((ev) => ev.type === 'anniversary')
+    .map((ev) => ({ ev, next: nextOccurrence(ev, today) }))
+    .filter((x) => x.next)
+    .sort((a, b) => a.next.date.localeCompare(b.next.date))[0];
+}
+
+export function HomeScreen({ me, pushState, events, settings, onOpenTab }) {
   const [members, setMembers] = useState({});
   const [sent, setSent] = useState('');
   useEffect(() => observeMembers(setMembers), []);
 
+  const today = todayStr();
   const partner = ROLES[partnerOf(me)];
+  const start = settings.relationship_start;
+  const upcoming = nextAnniversary(events, today);
+  const todayItems = itemsOn(events, today);
 
   async function ping() {
     setSent('傳送中…');
@@ -35,18 +43,32 @@ export function HomeScreen({ me, pushState }) {
   return html`
     <div class="page">
       <h1>嗨，${ROLES[me].name} 👋</h1>
-      ${Object.values(ROLES).map((r) => {
-        const info = members[r.id];
-        return html`
-          <div class="card ${r.id}">
-            <div class="card-title">${r.name}${r.id === me ? '（我）' : ''}</div>
-            <div>${info ? `✅ 已加入${fmt(info.updated_at)}` : '⏳ 還沒打開 App'}</div>
-          </div>
-        `;
-      })}
-      <button class="btn ${partner.id}" style="max-width:none" onClick=${ping}>💌 傳一顆愛心給${partner.name}</button>
+
+      <div class="hero">
+        ${start
+          ? html`<div class="hero-big">💞 在一起第 ${daysBetween(start, today) + 1} 天</div>`
+          : html`<button class="link" onClick=${() => onOpenTab('more')}>💞 設定交往起始日，就能看到在一起幾天</button>`}
+        ${upcoming && html`
+          <div>
+            ${upcoming.next.date === today
+              ? `🎉 今天是${upcoming.ev.title}${upcoming.next.years > 0 ? `（${upcoming.next.years} 週年）` : ''}！`
+              : `❤️ ${upcoming.ev.title}${upcoming.next.years > 0 ? `（${upcoming.next.years} 週年）` : ''}還有 ${daysBetween(today, upcoming.next.date)} 天`}
+          </div>`}
+      </div>
+
+      <h2 class="day-title">今天</h2>
+      ${todayItems.length === 0 && html`<p class="hint">今天沒有安排</p>`}
+      ${todayItems.map((ev) => html`<${EventLine} ev=${ev} dateStr=${today} onClick=${() => onOpenTab('calendar')} />`)}
+
+      <button class="btn ${partner.id}" style="max-width:none;margin-top:8px" onClick=${ping}>💌 傳一顆愛心給${partner.name}</button>
       ${sent && html`<p class="hint" style="text-align:center">${sent}</p>`}
-      ${pushState && html`<p class="hint" style="text-align:center">${PUSH_TEXT[pushState] ?? ''}</p>`}
+
+      <div class="members">
+        ${Object.values(ROLES).map((r) => html`
+          <span>${r.name}${members[r.id] ? ' ✅' : ' ⏳'}</span>
+        `)}
+        ${PUSH_TEXT[pushState] && html`<span>${PUSH_TEXT[pushState]}</span>`}
+      </div>
     </div>
   `;
 }

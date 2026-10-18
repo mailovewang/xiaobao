@@ -141,3 +141,91 @@ button { font: inherit; cursor: pointer; }
 .nav button.active .icon { filter: none; opacity: 1; }
 
 .version { text-align: center; color: var(--muted); font-size: 12px; }
+
+:root { --anniversary: #e53935; }
+
+h2.day-title { font-size: 18px; margin: 8px 0 0; }
+.link { border: none; background: none; color: var(--xiaobao); padding: 0; text-align: left; font-weight: 700; }
+.icon-btn { border: none; background: var(--card); border-radius: 12px; width: 40px; height: 40px; font-size: 22px; }
+.danger { color: #d32f2f !important; }
+
+/* 首頁 */
+.hero {
+  background: linear-gradient(135deg, #ffd6e4, #dfe8ff);
+  border-radius: 20px;
+  padding: 18px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.hero-big { font-size: 22px; font-weight: 700; }
+.members { display: flex; flex-wrap: wrap; gap: 12px; justify-content: center; color: var(--muted); font-size: 13px; }
+
+/* 月曆 */
+.month-bar { display: flex; align-items: center; justify-content: space-between; }
+.month-bar h1 { margin: 0; font-size: 22px; }
+.notice {
+  border: none; border-radius: 12px; padding: 12px; text-align: left;
+  background: #fff3cd; color: #6b5200;
+}
+.cal { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; background: var(--card); border-radius: 16px; padding: 8px; }
+.cal-head { text-align: center; font-size: 12px; color: var(--muted); padding: 4px 0; }
+.cal-day {
+  border: none; background: none; border-radius: 10px;
+  aspect-ratio: 1 / 1.05; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px;
+  color: var(--text); font-size: 15px;
+}
+.cal-day.today span:first-child { color: var(--xiaobao); font-weight: 700; }
+.cal-day.selected { background: #ffe3ec; }
+.dots { display: flex; gap: 3px; height: 6px; }
+.dots i { width: 6px; height: 6px; border-radius: 50%; display: block; }
+.dots i.maimai, .event-line.maimai { --c: var(--maimai); }
+.dots i.xiaobao, .event-line.xiaobao { --c: var(--xiaobao); }
+.dots i.anniversary, .event-line.anniversary { --c: var(--anniversary); }
+.dots i { background: var(--c); }
+
+.event-line {
+  display: flex; gap: 12px; align-items: center; width: 100%; text-align: left;
+  border: none; background: var(--card); border-radius: 14px; padding: 12px 14px;
+  border-left: 6px solid var(--c, var(--line)); color: var(--text);
+}
+.event-time { min-width: 52px; font-size: 13px; color: var(--muted); }
+.event-title { flex: 1; font-weight: 600; }
+.event-title small { display: block; font-weight: 400; color: var(--muted); margin-top: 2px; }
+
+.fab {
+  position: fixed; right: 20px;
+  bottom: calc(var(--nav-h) + env(safe-area-inset-bottom) + 20px);
+  width: 56px; height: 56px; border-radius: 50%; border: none;
+  background: var(--xiaobao); color: #fff; font-size: 30px;
+  box-shadow: 0 4px 12px rgba(240, 98, 146, .4);
+}
+
+/* 底部彈出表單 */
+.sheet-backdrop {
+  position: fixed; inset: 0; z-index: 20; background: rgba(0, 0, 0, .35);
+  display: flex; align-items: flex-end;
+}
+.sheet {
+  width: 100%; max-height: 90vh; overflow: auto;
+  background: var(--bg); border-radius: 20px 20px 0 0;
+  padding: 20px 16px calc(env(safe-area-inset-bottom) + 16px);
+  display: flex; flex-direction: column; gap: 12px;
+}
+.sheet h2 { margin: 0; }
+.sheet fieldset { border: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 12px; }
+.sheet label { display: flex; flex-direction: column; gap: 4px; font-size: 14px; color: var(--muted); }
+.sheet label.check { flex-direction: row; align-items: center; gap: 8px; color: var(--text); font-size: 16px; }
+.sheet input:not([type=checkbox]), .sheet textarea {
+  font: inherit; font-size: 16px; color: var(--text);
+  padding: 10px 12px; border: 2px solid var(--line); border-radius: 12px; background: var(--card); outline: none;
+}
+.sheet input:focus, .sheet textarea:focus { border-color: var(--xiaobao); }
+.sheet input[type=checkbox] { width: 20px; height: 20px; accent-color: var(--xiaobao); }
+.row { display: flex; gap: 12px; }
+.row > * { flex: 1; }
+.sheet-actions { display: flex; gap: 8px; justify-content: flex-end; }
+.sheet-actions .btn { width: auto; padding: 12px 20px; font-size: 16px; }
+.segmented { display: flex; background: var(--line); border-radius: 12px; padding: 4px; }
+.segmented button { flex: 1; border: none; background: none; border-radius: 10px; padding: 10px; font-size: 16px; color: var(--muted); }
+.segmented button.on { background: var(--card); color: var(--text); font-weight: 700; }
