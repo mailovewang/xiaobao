@@ -320,3 +320,6 @@ h2.day-title { font-size: 18px; margin: 8px 0 0; }
 .amount-input { font-size: 28px !important; font-weight: 700; }
 .chips.wrap { flex-wrap: wrap; }
 .chips.wrap button { flex: 0 0 auto; padding: 8px 12px; }
+
+/* 私密清單 */
+.todo-line.secret { --c: #9575cd; }

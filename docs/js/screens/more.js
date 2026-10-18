@@ -5,6 +5,7 @@ import { ROLES, partnerOf } from '../roles.js';
 import { VERSION } from '../version.js';
 import { LedgerScreen } from './ledger.js';
 import { PinGate } from './pin.js';
+import { SecretsScreen } from './secrets.js';
 
 /** 「更多」分頁：記帳、私密清單、設定。 */
 export function MoreScreen({ me, settings, onSwitchRole }) {
@@ -29,6 +30,9 @@ export function MoreScreen({ me, settings, onSwitchRole }) {
   if (page === 'ledger') {
     return html`${bar('💰 個人記帳')}<${PinGate} me=${me}><${LedgerScreen} me=${me} /></${PinGate}>`;
   }
+  if (page === 'secrets') {
+    return html`${bar('🎁 私密清單')}<${PinGate} me=${me}><${SecretsScreen} me=${me} /></${PinGate}>`;
+  }
   if (page === 'change-pin') {
     return html`${bar('🔒 更改 PIN')}<${PinGate} me=${me} mode="change"
       onDone=${() => { back(); setToast('PIN 已更新'); setTimeout(() => setToast(''), 2500); }} />`;
@@ -39,7 +43,7 @@ export function MoreScreen({ me, settings, onSwitchRole }) {
       <h1>更多</h1>
       <div class="list">
         <button class="list-item" onClick=${() => setPage('ledger')}>💰 個人記帳<small>只有自己看得到，需要 PIN</small></button>
-        <div class="list-item">🎁 私密清單<small>第 7 步會做</small></div>
+        <button class="list-item" onClick=${() => setPage('secrets')}>🎁 私密清單<small>驚喜、禮物、想法，只有自己看得到</small></button>
       </div>
       <div class="list">
         <button class="list-item" onClick=${() => setEditingStart(true)}>
