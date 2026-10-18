@@ -42,7 +42,8 @@
 | members/{role} | role（maimai／xiaobao）、uid、push_token、updated_at |
 | pings | created_by、created_at（傳愛心） |
 | events | type（event／anniversary）、owner（maimai／xiaobao／shared）、title、date（YYYY-MM-DD）、all_day、start_time、end_time（HH:mm）、location、note、repeat_yearly、created_by、created_at、updated_at |
-| courses | owner、name、weekday、start_time、end_time、location、color |
+| courses | owner、name、weekday（1=週一…7=週日）、start_time、end_time、location、color |
+| periods/{role} | list：[{ label, start, end }]（每人學校的節次，課表一節一格） |
 | todos | title、note、created_by、assignee、remind_at、done、done_at、created_at |
 | expenses | owner、kind（expense／income）、amount、category、date、note、created_at |
 | secrets | owner、title、type、note、target_date、done |

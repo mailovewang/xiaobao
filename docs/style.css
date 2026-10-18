@@ -230,22 +230,29 @@ h2.day-title { font-size: 18px; margin: 8px 0 0; }
 .segmented button { flex: 1; border: none; background: none; border-radius: 10px; padding: 10px; font-size: 16px; color: var(--muted); }
 .segmented button.on { background: var(--card); color: var(--text); font-weight: 700; }
 
-/* 課表 */
-.tt { display: grid; gap: 0 3px; background: var(--card); border-radius: 16px; padding: 8px 6px; }
-.tt-head { text-align: center; font-size: 13px; color: var(--muted); padding: 4px 0 6px; }
+/* 課表：一節一格 */
+.tt { display: grid; gap: 2px; background: var(--card); border-radius: 16px; padding: 8px 6px; }
+.tt-head { text-align: center; font-size: 13px; color: var(--muted); padding: 2px 0 4px; grid-row: 1; }
 .tt-head.today { color: var(--xiaobao); font-weight: 700; }
-.tt-hours div { font-size: 11px; color: var(--muted); text-align: right; padding-right: 4px; transform: translateY(-6px); }
-.tt-col {
-  position: relative; border-radius: 8px;
-  background-image: linear-gradient(to bottom, var(--line) 1px, transparent 1px);
-}
-.tt-col.today { background-color: #fff3f7; }
+.tt-period { display: flex; flex-direction: column; align-items: center; justify-content: center; line-height: 1.15; color: var(--muted); }
+.tt-period b { font-size: 13px; color: var(--text); }
+.tt-period small { font-size: 10px; }
+.tt-cell { background: #faf3f6; border-radius: 6px; }
+.tt-cell.today { background: #ffe9f0; }
 .tt-course {
-  position: absolute; left: 1px; right: 1px; border: none; border-radius: 8px;
-  padding: 4px; overflow: hidden; text-align: left; color: #33272a; font-size: 12px; line-height: 1.25;
+  z-index: 1; border: none; border-radius: 8px; margin: 0;
+  padding: 4px; overflow: hidden; text-align: left; color: #33272a; line-height: 1.25;
+  display: flex; flex-direction: column; justify-content: center;
 }
-.tt-course b { display: block; font-size: 12px; }
-.tt-course small { display: block; font-size: 11px; opacity: .75; }
+.tt-course b { font-size: 12px; }
+.tt-course small { font-size: 10px; opacity: .75; margin-top: 2px; }
+.chip-btn { border: none; background: var(--card); border-radius: 12px; padding: 8px 12px; font-size: 14px; color: var(--text); }
+.period-row { display: grid; grid-template-columns: 1fr 1.2fr 1.2fr 40px; gap: 6px; align-items: center; }
+.period-row input { min-width: 0; padding: 8px !important; font-size: 14px !important; }
+.sheet select {
+  font: inherit; font-size: 15px; color: var(--text); padding: 10px 8px;
+  border: 2px solid var(--line); border-radius: 12px; background: var(--card); min-width: 0;
+}
 
 .field-label { font-size: 14px; color: var(--muted); margin-bottom: 4px; }
 .chips { display: flex; gap: 6px; }
