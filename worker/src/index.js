@@ -20,7 +20,7 @@ export default {
     if (request.method !== 'POST') return reply(405, { error: 'method' });
 
     try {
-      const { collection, id } = await request.json().catch(() => ({}));
+      const { collection, id, action = 'created' } = await request.json().catch(() => ({}));
       if (!COLLECTIONS.includes(collection) || !/^[A-Za-z0-9]{1,64}$/.test(id ?? '')) {
         return reply(400, { error: 'bad request' });
       }
@@ -36,10 +36,14 @@ export default {
       if (!(await db(`devices/${uid}`))) return reply(403, { error: 'not joined' });
 
       const doc = await db(`${collection}/${id}`);
-      const from = doc?.created_by;
-      if (!NAMES[from]) return reply(404, { error: 'no such doc' });
+      // 「完成待辦」由完成的人發出，其他都由新增的人發出
+      const done = action === 'done' && collection === 'todos';
+      const from = done ? doc?.done_by : doc?.created_by;
+      if (!NAMES[from] || (done && !doc.done)) return reply(404, { error: 'no such doc' });
 
-      const message = buildMessage(collection, doc, NAMES[from]);
+      const message = done
+        ? { title: `${NAMES[from]} 完成了你交代的事 ✅`, body: doc.title || '' }
+        : buildMessage(collection, doc, NAMES[from]);
       const partner = await db(`members/${partnerOf(from)}`);
       if (!partner?.push_token) return reply(200, { sent: false, reason: 'partner has no push token' });
 

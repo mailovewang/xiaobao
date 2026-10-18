@@ -268,3 +268,20 @@ h2.day-title { font-size: 18px; margin: 8px 0 0; }
 .today-courses { display: flex; flex-direction: column; gap: 6px; }
 .today-course { display: flex; gap: 10px; align-items: center; font-size: 14px; }
 .today-course i { width: 10px; height: 10px; border-radius: 3px; display: block; }
+
+/* 待辦 */
+.todo-line {
+  display: flex; align-items: center; gap: 4px; background: var(--card); border-radius: 14px;
+  border-left: 6px solid var(--c, var(--line)); padding-left: 8px;
+}
+.todo-line.maimai { --c: var(--maimai); }
+.todo-line.xiaobao { --c: var(--xiaobao); }
+.todo-check {
+  flex: none; width: 28px; height: 28px; border-radius: 50%; border: 2px solid var(--c); background: none;
+  color: #fff; font-size: 16px; font-weight: 700; display: flex; align-items: center; justify-content: center;
+}
+.todo-line.done .todo-check { background: var(--c); }
+.todo-body { flex: 1; text-align: left; border: none; background: none; padding: 12px 10px; color: var(--text); font-size: 16px; }
+.todo-body small { display: block; font-size: 13px; color: var(--muted); margin-top: 2px; }
+.todo-line.done .todo-body { color: var(--muted); text-decoration: line-through; }
+.late { color: #d32f2f; font-weight: 700; }

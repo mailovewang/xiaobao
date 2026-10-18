@@ -67,12 +67,12 @@ const NOTIFY_URL = location.hostname === 'localhost'
   ? 'http://localhost:8787'
   : 'https://xiaobao-notify.maimai-xiaobao.workers.dev';
 
-/** 請推播服務通知對方「我新增了 collection/id」。失敗不影響資料本身。 */
-export async function notifyPartner(collection, id) {
+/** 請推播服務通知對方「我新增了（或完成了 action='done'）collection/id」。失敗不影響資料本身。 */
+export async function notifyPartner(collection, id, action = 'created') {
   const res = await fetch(NOTIFY_URL, {
     method: 'POST',
     headers: { Authorization: `Bearer ${await auth.currentUser.getIdToken()}`, 'Content-Type': 'application/json' },
-    body: JSON.stringify({ collection, id }),
+    body: JSON.stringify({ collection, id, action }),
   });
   return res.json();
 }

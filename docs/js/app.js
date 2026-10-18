@@ -6,6 +6,8 @@ import { syncReminders } from './reminders.js';
 import { CalendarScreen } from './screens/calendar.js';
 import { observeCourses } from './courses.js';
 import { observePeriods } from './periods.js';
+import { observeTodos } from './todos.js';
+import { TodoScreen } from './screens/todo.js';
 import { TimetableScreen } from './screens/timetable.js';
 import { loadRole, saveRole, partnerOf } from './roles.js';
 import { JoinScreen, RoleScreen } from './screens/setup.js';
@@ -19,10 +21,6 @@ const TABS = [
   { id: 'todo', label: '待辦', icon: '✅' },
   { id: 'more', label: '更多', icon: '☰' },
 ];
-
-function ComingSoon({ name, step }) {
-  return html`<p class="soon">${name}：${step} 會做 🚧</p>`;
-}
 
 function Main({ me, onSwitchRole }) {
   const [tab, setTab] = useState('home');
@@ -39,15 +37,18 @@ function Main({ me, onSwitchRole }) {
   const [periodsByRole, setPeriodsByRole] = useState({});
   useEffect(() => observePeriods(setPeriodsByRole), []);
 
+  const [todos, setTodos] = useState([]);
+  useEffect(() => observeTodos(setTodos), []);
+
   const events = useMemo(() => withRelationship(rawEvents, settings), [rawEvents, settings]);
-  // 行程一有變動就重排這支手機的提醒
-  useEffect(() => { syncReminders(events, me).catch(() => {}); }, [events, me]);
+  // 行程或待辦一有變動就重排這支手機的提醒
+  useEffect(() => { syncReminders(events, me, todos).catch(() => {}); }, [events, todos, me]);
 
   return html`
-    ${tab === 'home' && html`<${HomeScreen} me=${me} pushState=${pushState} events=${events} courses=${courses} settings=${settings} onOpenTab=${setTab} />`}
+    ${tab === 'home' && html`<${HomeScreen} me=${me} pushState=${pushState} events=${events} courses=${courses} todos=${todos} settings=${settings} onOpenTab=${setTab} />`}
     ${tab === 'calendar' && html`<${CalendarScreen} me=${me} events=${events} />`}
     ${tab === 'timetable' && html`<${TimetableScreen} me=${me} courses=${courses} periodsByRole=${periodsByRole} />`}
-    ${tab === 'todo' && html`<${ComingSoon} name="待辦" step="第 5 步" />`}
+    ${tab === 'todo' && html`<${TodoScreen} me=${me} todos=${todos} />`}
     ${tab === 'more' && html`<${MoreScreen} me=${me} settings=${settings} onSwitchRole=${onSwitchRole} />`}
     <nav class="nav">
       ${TABS.map((t) => html`

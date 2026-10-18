@@ -4,6 +4,8 @@ import { daysBetween, nextOccurrence, todayStr } from '../dates.js';
 import { ROLES, partnerOf } from '../roles.js';
 import { EventLine, itemsOn } from './calendar.js';
 import { coursesOn, todayWeekday } from '../courses.js';
+import { sortTodos } from '../todos.js';
+import { TodoLine } from './todo.js';
 
 const PUSH_TEXT = {
   denied: '🔕 通知被關掉了，請到手機設定 → 應用程式 → 小寶 → 通知 打開',
@@ -19,8 +21,9 @@ function nextAnniversary(events, today) {
     .sort((a, b) => a.next.date.localeCompare(b.next.date))[0];
 }
 
-export function HomeScreen({ me, pushState, events, courses, settings, onOpenTab }) {
+export function HomeScreen({ me, pushState, events, courses, todos, settings, onOpenTab }) {
   const weekday = todayWeekday();
+  const myTodos = sortTodos(todos.filter((t) => t.assignee === me && !t.done));
   const [members, setMembers] = useState({});
   const [sent, setSent] = useState('');
   useEffect(() => observeMembers(setMembers), []);
@@ -61,6 +64,12 @@ export function HomeScreen({ me, pushState, events, courses, settings, onOpenTab
       <h2 class="day-title">今天</h2>
       ${todayItems.length === 0 && html`<p class="hint">今天沒有安排</p>`}
       ${todayItems.map((ev) => html`<${EventLine} ev=${ev} dateStr=${today} onClick=${() => onOpenTab('calendar')} />`)}
+
+      ${myTodos.length > 0 && html`
+        <h2 class="day-title">我要做的（${myTodos.length}）</h2>
+        ${myTodos.slice(0, 3).map((t) => html`<${TodoLine} todo=${t} me=${me} onOpen=${() => onOpenTab('todo')} />`)}
+        ${myTodos.length > 3 && html`<button class="link" onClick=${() => onOpenTab('todo')}>看全部 ›</button>`}
+      `}
 
       ${Object.values(ROLES).some((r) => coursesOn(courses, r.id, weekday).length) && html`
         <h2 class="day-title">今天的課</h2>

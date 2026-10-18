@@ -11,10 +11,23 @@ const idOf = (str) => {
   return Math.abs(h) % 2000000000 + 1;
 };
 
+const NAMES = { maimai: '麥麥', xiaobao: '小寶' };
+
 /** 這支手機（me）應該收到哪些提醒。 */
-export function plannedReminders(events, me, now = new Date()) {
+export function plannedReminders(events, me, now = new Date(), todos = []) {
   const list = [];
   const today = todayStr();
+
+  // 待辦：時間到提醒負責的人
+  for (const t of todos) {
+    if (t.done || t.assignee !== me || !t.remind_at) continue;
+    list.push({
+      key: `${t.id}:todo:${t.remind_at}`,
+      at: parseDate(t.remind_at.slice(0, 10), t.remind_at.slice(11, 16)),
+      title: `⏰ ${t.title}`,
+      body: t.created_by !== me ? `${NAMES[t.created_by]}交代的` : t.note || '',
+    });
+  }
 
   for (const ev of events) {
     if (ev.type === 'event') {
@@ -62,8 +75,14 @@ export async function checkExact() {
 
 export const askExact = () => LN?.changeExactNotificationSetting().then(checkExact);
 
-/** 重排這支手機的所有提醒。 */
-export async function syncReminders(events, me) {
+/** 重排這支手機的所有提醒。資料連續變動時一次只跑一個，避免互相干擾。 */
+let queue = Promise.resolve();
+export function syncReminders(events, me, todos = []) {
+  queue = queue.catch(() => {}).then(() => resync(events, me, todos));
+  return queue;
+}
+
+async function resync(events, me, todos) {
   if (!LN) return;
   if (exactAllowed === null) await checkExact();
   await LN.createChannel({ id: 'reminders', name: '提醒', importance: 4 });
@@ -71,7 +90,9 @@ export async function syncReminders(events, me) {
   const pending = (await LN.getPending()).notifications;
   if (pending.length) await LN.cancel({ notifications: pending.map((n) => ({ id: n.id })) });
 
-  const list = plannedReminders(events, me).slice(0, 60);
+  const list = plannedReminders(events, me, new Date(), todos)
+    .sort((a, b) => a.at - b.at)
+    .slice(0, 60); // 太多的話只排最近的 60 個，下次打開 App 再補
   if (!list.length) return;
   await LN.schedule({
     notifications: list.map((r) => ({
