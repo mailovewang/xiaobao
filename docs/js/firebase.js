@@ -54,6 +54,19 @@ export function registerMember(roleId) {
     role: roleId,
     uid: auth.currentUser.uid,
     updated_at: fs.serverTimestamp(),
+  }, { merge: true }); // merge：保留已存的推播位址
+}
+
+/** 存這支手機的推播位址；傳 null 代表清掉（切換身分時）。 */
+export function savePushToken(roleId, token) {
+  return fs.setDoc(fs.doc(db, 'spaces', 'home', 'members', roleId), { push_token: token }, { merge: true });
+}
+
+/** 傳一顆愛心給對方（雲端函式會推播給對方）。 */
+export function sendPing(fromRoleId) {
+  return fs.addDoc(fs.collection(db, 'spaces', 'home', 'pings'), {
+    created_by: fromRoleId,
+    created_at: fs.serverTimestamp(),
   });
 }
 

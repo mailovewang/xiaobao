@@ -1,5 +1,6 @@
 import { html, render, useEffect, useState } from '../vendor/preact-htm.js';
-import { signIn, isJoined, registerMember } from './firebase.js';
+import { signIn, isJoined, registerMember, savePushToken } from './firebase.js';
+import { setupPush } from './push.js';
 import { loadRole, saveRole, partnerOf } from './roles.js';
 import { JoinScreen, RoleScreen } from './screens/setup.js';
 import { HomeScreen } from './screens/home.js';
@@ -19,8 +20,13 @@ function ComingSoon({ name, step }) {
 
 function Main({ me, onSwitchRole }) {
   const [tab, setTab] = useState('home');
+  const [pushState, setPushState] = useState(null);
+  useEffect(() => {
+    setupPush(me).then(setPushState).catch(() => setPushState('denied'));
+  }, [me]);
+
   return html`
-    ${tab === 'home' && html`<${HomeScreen} me=${me} />`}
+    ${tab === 'home' && html`<${HomeScreen} me=${me} pushState=${pushState} />`}
     ${tab === 'calendar' && html`<${ComingSoon} name="日曆" step="第 3 步" />`}
     ${tab === 'timetable' && html`<${ComingSoon} name="課表" step="第 4 步" />`}
     ${tab === 'todo' && html`<${ComingSoon} name="待辦" step="第 5 步" />`}
@@ -59,6 +65,9 @@ function App() {
   useEffect(() => { start(); }, []);
 
   function choose(role) {
+    // 切換身分時，把舊身分的推播位址清掉，免得通知送回自己這支手機
+    const old = loadRole();
+    if (old && old !== role) savePushToken(old, null).catch(() => {});
     saveRole(role);
     setMe(role);
     registerMember(role).catch(() => {});

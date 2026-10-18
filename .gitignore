@@ -24,3 +24,4 @@ apk/
 # Capacitor
 android/app/build/
 android/capacitor-cordova-android-plugins/build/
+firebase/functions/node_modules/
