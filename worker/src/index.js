@@ -4,7 +4,7 @@
 
 const NAMES = { maimai: '麥麥', xiaobao: '小寶' };
 const partnerOf = (id) => (id === 'maimai' ? 'xiaobao' : 'maimai');
-const COLLECTIONS = ['pings', 'events', 'todos'];
+const COLLECTIONS = ['pings', 'events', 'todos', 'places'];
 
 const CORS = {
   'Access-Control-Allow-Origin': '*',
@@ -79,6 +79,8 @@ function buildMessage(collection, data, name) {
       return data.assignee && data.assignee !== data.created_by
         ? { title: `${name} 交代你一件事 ✅`, body: data.title || '' }
         : { title: `${name} 新增了待辦`, body: data.title || '' };
+    case 'places':
+      return { title: `${name} 找到想去的地方 📍`, body: [data.name, data.area].filter(Boolean).join(' · ') };
   }
 }
 

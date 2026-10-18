@@ -10,11 +10,12 @@
 4. 個人記帳：支出／收入、金額、分類（餐飲、交通、娛樂、購物、其他）、日期、備註，月合計。只有自己看得到。
 5. 私密清單：驚喜／禮物／想法，只有自己看得到。
 6. 通知：對方新增行程或待辦時即時推播；首頁有「傳愛心」按鈕。
+7. 想去的地方（v1.1）：從 IG「分享 → 小寶」或貼上連結新增，記店名、地區、類型、誰想去，可依地區篩選，可標記去過。需要 v1.1 APK。
 
 記帳與私密清單共用一組 4 位數 PIN（畫面鎖），App 切到背景就重新上鎖。
 
 ## 之後再做
-想去的地方清單、交換日記、照片牆、上課提醒、桌面小工具、記帳預算圖表、共同記帳、離線快取。
+交換日記、照片牆、上課提醒、桌面小工具、記帳預算圖表、共同記帳、離線快取。
 
 ## 技術架構（2026-10-18 改為網頁版，為了自動更新）
 - App：網頁（Preact + htm，無建置步驟）放在 docs/，GitHub Pages 發布：https://mailovewang.github.io/xiaobao/
@@ -46,6 +47,7 @@
 | periods/{role} | list：[{ label, start, end }]（每人學校的節次，課表一節一格） |
 | todos | title、note、created_by、assignee、remind_at（YYYY-MM-DDTHH:mm）、done、done_by、done_at、created_at |
 | expenses | owner、kind（expense／income）、amount、category、date、note、created_at |
+| places | name、area、type（food／dessert／spot）、ig_url、wants（maimai／xiaobao／both）、note、visited、created_by、created_at（新增時推播對方） |
 | secrets | owner、title、type（gift／surprise／idea）、note、target_date、done、created_at（不通知對方、不排提醒） |
 | settings（spaces/home 本身） | relationship_start |
 | pins/{role} | salt、hash（PIN 的加鹽 SHA-256；放雲端，對方切換成你的身分也要輸入你的 PIN） |

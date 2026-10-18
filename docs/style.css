@@ -323,3 +323,17 @@ h2.day-title { font-size: 18px; margin: 8px 0 0; }
 
 /* 私密清單 */
 .todo-line.secret { --c: #9575cd; }
+
+/* 想去的地方 */
+.place { display: flex; align-items: stretch; background: var(--card); border-radius: 14px; overflow: hidden; }
+.place-body { flex: 1; text-align: left; border: none; background: none; padding: 12px 14px; color: var(--text); display: flex; flex-direction: column; gap: 3px; }
+.place-body b { font-size: 16px; }
+.place-body small { color: var(--muted); font-size: 13px; }
+.place-ig {
+  flex: none; display: flex; align-items: center; padding: 0 14px; text-decoration: none; font-weight: 700; font-size: 14px;
+  color: #fff; background: linear-gradient(135deg, #f58529, #dd2a7b, #8134af);
+}
+.sheet .row .chip-btn { background: var(--line); }
+a.link { text-decoration: none; }
+.nav button { font-size: 11px; }
+.place.visited { opacity: .6; }

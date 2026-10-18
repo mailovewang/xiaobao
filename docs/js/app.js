@@ -9,6 +9,9 @@ import { observePeriods } from './periods.js';
 import { observeTodos } from './todos.js';
 import { TodoScreen } from './screens/todo.js';
 import { TimetableScreen } from './screens/timetable.js';
+import { observePlaces, extractUrl } from './places.js';
+import { onShared } from './share.js';
+import { PlacesScreen } from './screens/places.js';
 import { loadRole, saveRole, partnerOf } from './roles.js';
 import { JoinScreen, RoleScreen } from './screens/setup.js';
 import { HomeScreen } from './screens/home.js';
@@ -19,6 +22,7 @@ const TABS = [
   { id: 'calendar', label: '日曆', icon: '📅' },
   { id: 'timetable', label: '課表', icon: '📚' },
   { id: 'todo', label: '待辦', icon: '✅' },
+  { id: 'places', label: '想去', icon: '📍' },
   { id: 'more', label: '更多', icon: '☰' },
 ];
 
@@ -39,6 +43,15 @@ function Main({ me, onSwitchRole }) {
 
   const [todos, setTodos] = useState([]);
   useEffect(() => observeTodos(setTodos), []);
+  const [places, setPlaces] = useState([]);
+  useEffect(() => observePlaces(setPlaces), []);
+
+  // 從 IG 分享進來：切到「想去」並打開新增表單
+  const [shared, setShared] = useState('');
+  useEffect(() => onShared((text) => {
+    setShared(extractUrl(text) || text);
+    setTab('places');
+  }), []);
 
   const events = useMemo(() => withRelationship(rawEvents, settings), [rawEvents, settings]);
   // 行程或待辦一有變動就重排這支手機的提醒
@@ -49,6 +62,7 @@ function Main({ me, onSwitchRole }) {
     ${tab === 'calendar' && html`<${CalendarScreen} me=${me} events=${events} />`}
     ${tab === 'timetable' && html`<${TimetableScreen} me=${me} courses=${courses} periodsByRole=${periodsByRole} />`}
     ${tab === 'todo' && html`<${TodoScreen} me=${me} todos=${todos} />`}
+    ${tab === 'places' && html`<${PlacesScreen} me=${me} places=${places} shared=${shared} onSharedUsed=${() => setShared('')} />`}
     ${tab === 'more' && html`<${MoreScreen} me=${me} settings=${settings} onSwitchRole=${onSwitchRole} />`}
     <nav class="nav">
       ${TABS.map((t) => html`
