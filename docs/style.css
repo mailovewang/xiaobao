@@ -338,3 +338,47 @@ a.link { text-decoration: none; }
 .nav button { font-size: 11px; }
 .place.visited { opacity: .6; }
 .crash { white-space: pre-wrap; text-align: left; font-size: 12px; background: var(--card); padding: 12px; border-radius: 12px; max-width: 100%; overflow: auto; }
+
+/* 愛心 */
+.hearts { border-left-width: 6px; display: flex; flex-direction: column; gap: 10px; }
+.hearts .card-title small { font-weight: 400; color: var(--muted); margin-left: 8px; font-size: 13px; }
+.heart-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+.heart-grid button {
+  border: none; border-radius: 14px; background: var(--bg); padding: 10px 4px;
+  display: flex; flex-direction: column; align-items: center; gap: 2px; font-size: 13px; color: var(--text);
+}
+.heart-grid button span { font-size: 24px; }
+.heart-grid button:active { background: #ffe3ec; }
+.heart-text { display: flex; gap: 8px; }
+.heart-text input {
+  flex: 1; min-width: 0; font: inherit; font-size: 15px; padding: 10px 12px;
+  border: 2px solid var(--line); border-radius: 12px; background: var(--card); outline: none;
+}
+.heart-text .btn { width: auto; padding: 10px 16px; font-size: 15px; }
+.received { display: flex; flex-direction: column; gap: 4px; font-size: 14px; border-top: 1px solid var(--line); padding-top: 8px; }
+.received b { color: var(--xiaobao); }
+
+/* 想去的地方：右側按鈕 */
+.place-btn {
+  flex: none; display: flex; align-items: center; justify-content: center; text-align: center;
+  width: 52px; text-decoration: none; font-weight: 700; font-size: 12px; line-height: 1.3; color: #fff;
+}
+.place-btn.ig { background: linear-gradient(135deg, #f58529, #dd2a7b, #8134af); }
+.place-btn.map { background: #34a853; }
+.heart-row { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+.heart-row b.maimai { color: var(--maimai); }
+.heart-row b.xiaobao { color: var(--xiaobao); }
+.caught { flex: none; font-size: 12px; color: #2e7d32; }
+.caught.waiting { color: var(--muted); }
+.catch-btn {
+  flex: none; border: none; border-radius: 999px; padding: 4px 10px; font-size: 13px;
+  background: #ffe3ec; color: var(--xiaobao); font-weight: 700;
+}
+
+/* 每月回顧 */
+.month-card { background: linear-gradient(135deg, #fff, #fff0f5); display: flex; flex-direction: column; gap: 8px; }
+.month-head { display: flex; justify-content: space-between; align-items: center; }
+.icon-btn.small { width: 30px; height: 30px; font-size: 14px; background: var(--bg); }
+.month-big { font-size: 18px; }
+.month-big b { font-size: 26px; color: var(--xiaobao); }
+.month-list { margin: 0; padding-left: 0; list-style: none; display: flex; flex-direction: column; gap: 4px; font-size: 14px; }

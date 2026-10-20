@@ -1,5 +1,5 @@
 import { html, useState } from '../../vendor/preact-htm.js';
-import { PLACE_TYPES, addPlace, deletePlace, extractUrl, placeTypeOf, safeUrl, updatePlace } from '../places.js';
+import { PLACE_TYPES, addPlace, deletePlace, extractUrl, isMapUrl, mapLinkOf, parseShared, placeTypeOf, safeUrl, updatePlace } from '../places.js';
 import { ROLES, partnerOf } from '../roles.js';
 
 const WANTS = (me) => [
@@ -9,11 +9,11 @@ const WANTS = (me) => [
 ];
 const wantsText = (w) => (w === 'both' ? '💞 兩個都想' : `${ROLES[w]?.name ?? ''}想去`);
 
-/** shared：從 IG 分享進來的連結，有的話直接打開新增表單 */
+/** shared：從 IG／Google 地圖分享進來的文字，有的話直接打開新增表單 */
 export function PlacesScreen({ me, places, shared, onSharedUsed }) {
   const [area, setArea] = useState('all');
   const [editing, setEditing] = useState(null);
-  const form = editing ?? (shared ? { ig_url: shared } : null);
+  const form = editing ?? (shared ? parseShared(shared) : null);
   const close = () => { setEditing(null); onSharedUsed?.(); };
 
   const [showVisited, setShowVisited] = useState(false);
@@ -33,7 +33,8 @@ export function PlacesScreen({ me, places, shared, onSharedUsed }) {
           <small>${[p.area && `📍 ${p.area}`, t.label, wantsText(p.wants)].filter(Boolean).join(' · ')}</small>
           ${p.note && html`<small>${p.note}</small>`}
         </button>
-        ${safeUrl(p.ig_url) && html`<a class="place-ig" href=${safeUrl(p.ig_url)} target="_blank" rel="noopener">▶ IG</a>`}
+        ${mapLinkOf(p) && html`<a class="place-btn map" href=${mapLinkOf(p)} target="_blank" rel="noopener">🗺️<br />導航</a>`}
+        ${safeUrl(p.ig_url) && html`<a class="place-btn ig" href=${safeUrl(p.ig_url)} target="_blank" rel="noopener">▶<br />IG</a>`}
       </div>`;
   };
 
@@ -46,7 +47,7 @@ export function PlacesScreen({ me, places, shared, onSharedUsed }) {
           ${areas.map((a) => html`<button type="button" class=${area === a ? 'on' : ''} onClick=${() => setArea(a)}>📍 ${a}</button>`)}
         </div>`}
 
-      ${list.length === 0 && html`<p class="hint" style="text-align:center">在 IG 看到想去的店，按「分享」→ 選「小寶」，<br />或複製連結後按 ＋ 貼上</p>`}
+      ${list.length === 0 && html`<p class="hint" style="text-align:center">在 IG 或 Google 地圖看到想去的店，按「分享」→ 選「小寶」，<br />或複製連結後按 ＋ 貼上</p>`}
       ${list.map(row)}
 
       ${visited.length > 0 && html`
@@ -67,6 +68,7 @@ function PlaceForm({ me, place, areas, onClose }) {
     area: place.area ?? '',
     type: place.type ?? 'food',
     ig_url: place.ig_url ?? '',
+    map_url: place.map_url ?? '',
     wants: place.wants ?? 'both',
     note: place.note ?? '',
     visited: place.visited ?? false,
@@ -74,12 +76,14 @@ function PlaceForm({ me, place, areas, onClose }) {
   const [error, setError] = useState('');
   const set = (k) => (e) => { const v = e.target.value; setF((p) => ({ ...p, [k]: v })); };
 
+  // 貼上：是地圖連結就放到地圖欄，其他放到 IG 欄
   async function paste() {
     try {
       const text = await navigator.clipboard.readText();
       const url = extractUrl(text);
-      if (url) setF((p) => ({ ...p, ig_url: url }));
-      else setError('剪貼簿裡沒有連結，請先在 IG 按「複製連結」');
+      if (!url) return setError('剪貼簿裡沒有連結，請先在 IG 或 Google 地圖按「複製連結」');
+      setError('');
+      setF((p) => (isMapUrl(url) ? { ...p, map_url: url } : { ...p, ig_url: url }));
     } catch {
       setError('沒辦法讀剪貼簿，請長按連結欄位貼上');
     }
@@ -88,7 +92,7 @@ function PlaceForm({ me, place, areas, onClose }) {
   function save(e) {
     e.preventDefault();
     if (!f.name.trim()) return setError('請輸入店名');
-    const data = { ...f, name: f.name.trim(), area: f.area.trim(), ig_url: extractUrl(f.ig_url), note: f.note.trim() };
+    const data = { ...f, name: f.name.trim(), area: f.area.trim(), ig_url: extractUrl(f.ig_url), map_url: extractUrl(f.map_url), note: f.note.trim() };
     (isNew ? addPlace(data, me) : updatePlace(place.id, data)).catch(() => {});
     onClose();
   }
@@ -110,6 +114,9 @@ function PlaceForm({ me, place, areas, onClose }) {
           </div>
         </label>
         ${extractUrl(f.ig_url) && html`<a class="link" href=${extractUrl(f.ig_url)} target="_blank" rel="noopener">▶ 打開 IG 看一下店名</a>`}
+        <label>Google 地圖連結（可不填，沒填就用店名搜尋）
+          <input value=${f.map_url} onInput=${set('map_url')} placeholder="https://maps.app.goo.gl/..." />
+        </label>
         <label>店名<input value=${f.name} onInput=${set('name')} placeholder="例如：○○拉麵" /></label>
         <label>地區
           <input value=${f.area} onInput=${set('area')} list="areas" placeholder="例如：高雄左營" />

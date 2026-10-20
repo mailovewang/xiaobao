@@ -1,5 +1,12 @@
 import { html, useEffect, useState } from '../../vendor/preact-htm.js';
-import { observeMembers, sendPing } from '../firebase.js';
+import { observeMembers } from '../firebase.js';
+import { HEARTS, catchHeart, heartText, observeTodayHearts, sendHeart } from '../hearts.js';
+import { MonthCard, useMonthlyCard } from './monthly.js';
+
+const fmtTime = (ts) => {
+  const d = ts?.toDate?.();
+  return d ? `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}` : '剛剛';
+};
 import { daysBetween, nextOccurrence, todayStr } from '../dates.js';
 import { ROLES, partnerOf } from '../roles.js';
 import { EventLine, itemsOn } from './calendar.js';
@@ -34,11 +41,18 @@ export function HomeScreen({ me, pushState, events, courses, todos, settings, on
   const upcoming = nextAnniversary(events, today);
   const todayItems = itemsOn(events, today);
 
-  async function ping() {
+  const [hearts, setHearts] = useState([]);
+  const [text, setText] = useState('');
+  useEffect(() => observeTodayHearts(setHearts), []);
+  const recent = hearts.slice(0, 5); // 今天最近 5 顆（兩個方向都算）
+  const [lastMonth, dismissMonth] = useMonthlyCard();
+
+  async function send(kind, msg = '') {
     setSent('傳送中…');
     try {
-      await sendPing(me);
+      await sendHeart(me, kind, msg);
       setSent(`💌 已傳給${partner.name}`);
+      if (kind === 'text') setText('');
     } catch (e) {
       setSent('傳送失敗：' + e.message);
     }
@@ -60,6 +74,8 @@ export function HomeScreen({ me, pushState, events, courses, todos, settings, on
               : `❤️ ${upcoming.ev.title}${upcoming.next.years > 0 ? `（${upcoming.next.years} 週年）` : ''}還有 ${daysBetween(today, upcoming.next.date)} 天`}
           </div>`}
       </div>
+
+      ${lastMonth && html`<${MonthCard} month=${lastMonth} onClose=${dismissMonth} />`}
 
       <h2 class="day-title">今天</h2>
       ${todayItems.length === 0 && html`<p class="hint">今天沒有安排</p>`}
@@ -84,8 +100,32 @@ export function HomeScreen({ me, pushState, events, courses, todos, settings, on
           })}
         </div>`}
 
-      <button class="btn ${partner.id}" style="max-width:none;margin-top:8px" onClick=${ping}>💌 傳一顆愛心給${partner.name}</button>
-      ${sent && html`<p class="hint" style="text-align:center">${sent}</p>`}
+      <div class="card hearts ${partner.id}">
+        <div class="card-title">💌 傳給${partner.name}${hearts.length > 0 ? html`<small>今天互傳了 ${hearts.length} 顆 💕</small>` : ''}</div>
+        <div class="heart-grid">
+          ${HEARTS.map((h) => html`<button onClick=${() => send(h.id)}><span>${h.emoji}</span>${h.label}</button>`)}
+        </div>
+        <form class="heart-text" onSubmit=${(e) => { e.preventDefault(); if (text.trim()) send('text', text.trim()); }}>
+          <input value=${text} onInput=${(e) => setText(e.target.value)} maxLength="100" placeholder="自己打一句…" />
+          <button class="btn" disabled=${!text.trim()}>傳送</button>
+        </form>
+        ${sent && html`<p class="hint" style="text-align:center;margin:0">${sent}</p>`}
+        ${recent.length > 0 && html`
+          <div class="received">
+            ${recent.map((h) => {
+              const mine = h.created_by === me;
+              return html`
+                <div class="heart-row">
+                  <span><b class=${h.created_by}>${mine ? '我' : partner.name}</b> ${fmtTime(h.created_at)}　${heartText(h)}</span>
+                  ${h.caught_by
+                    ? html`<span class="caught">🤲 ${mine ? `${partner.name}接住了` : '已接住'}</span>`
+                    : mine
+                      ? html`<span class="caught waiting">還沒接住</span>`
+                      : html`<button class="catch-btn" onClick=${() => catchHeart(h, me).catch(() => {})}>🤲 接住</button>`}
+                </div>`;
+            })}
+          </div>`}
+      </div>
 
       <div class="members">
         ${Object.values(ROLES).map((r) => html`

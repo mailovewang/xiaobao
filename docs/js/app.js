@@ -9,7 +9,7 @@ import { observePeriods } from './periods.js';
 import { observeTodos } from './todos.js';
 import { TodoScreen } from './screens/todo.js';
 import { TimetableScreen } from './screens/timetable.js';
-import { observePlaces, extractUrl } from './places.js';
+import { observePlaces } from './places.js';
 import { onShared } from './share.js';
 import { PlacesScreen } from './screens/places.js';
 import { loadRole, saveRole, partnerOf } from './roles.js';
@@ -50,7 +50,7 @@ function Main({ me, onSwitchRole }) {
   // 從 IG 分享進來：切到「想去」並打開新增表單
   const [shared, setShared] = useState('');
   useEffect(() => onShared((text) => {
-    setShared(extractUrl(text));
+    setShared(text); // 想去頁會判斷是 IG 還是 Google 地圖
     setTab('places');
   }), []);
 
