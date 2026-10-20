@@ -48,18 +48,26 @@ export async function join(code) {
   }
 }
 
-/** 告訴對方「我在這支手機上用這個身分」。 */
+/**
+ * 告訴對方「我在這支手機上用這個身分」。
+ * 身分也記在這支手機自己的 devices/{uid}，推播服務靠它找到「對方的手機」。
+ */
 export function registerMember(roleId) {
-  return fs.setDoc(fs.doc(db, 'spaces', 'home', 'members', roleId), {
-    role: roleId,
-    uid: auth.currentUser.uid,
-    updated_at: fs.serverTimestamp(),
-  }, { merge: true }); // merge：保留已存的推播位址
+  return Promise.all([
+    fs.setDoc(fs.doc(db, 'spaces', 'home', 'members', roleId), {
+      role: roleId,
+      updated_at: fs.serverTimestamp(),
+    }, { merge: true }),
+    fs.setDoc(deviceDoc(), { role: roleId, seen_at: fs.serverTimestamp() }, { merge: true }),
+  ]);
 }
 
-/** 存這支手機的推播位址；傳 null 代表清掉（切換身分時）。 */
+/**
+ * 存這支手機的推播位址（每支手機各存一份在 devices/{uid}）。
+ * 以前存在 members/{role}，手機在切換身分時會把對方的位址清掉，所以改掉了。
+ */
 export function savePushToken(roleId, token) {
-  return fs.setDoc(fs.doc(db, 'spaces', 'home', 'members', roleId), { push_token: token }, { merge: true });
+  return fs.setDoc(deviceDoc(), { role: roleId, push_token: token }, { merge: true });
 }
 
 // 推播服務（Cloudflare Worker）。本機測試時用 wrangler dev 的位址

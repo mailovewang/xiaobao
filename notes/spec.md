@@ -39,8 +39,8 @@
 ## 資料結構（Firestore，皆在 spaces/home 底下）
 | 集合 | 欄位 |
 |---|---|
-| devices/{uid} | code、joined_at（輸入過暗號的手機） |
-| members/{role} | role（maimai／xiaobao）、uid、push_token、updated_at |
+| devices/{uid} | code、joined_at、role、push_token、seen_at（每支手機各一份；推播服務用 role 找對方的手機） |
+| members/{role} | role、updated_at（首頁顯示誰加入；舊版的 push_token 只做相容） |
 | pings | created_by、created_at（傳愛心） |
 | events | type（event／anniversary）、owner（maimai／xiaobao／shared）、title、date（YYYY-MM-DD）、all_day、start_time、end_time（HH:mm）、location、note、repeat_yearly、created_by、created_at、updated_at |
 | courses | owner、name、weekday（1=週一…7=週日）、start_time、end_time、location、color |

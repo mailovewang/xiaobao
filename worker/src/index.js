@@ -44,23 +44,30 @@ export default {
       const message = done
         ? { title: `${NAMES[from]} 完成了你交代的事 ✅`, body: doc.title || '' }
         : buildMessage(collection, doc, NAMES[from]);
-      const partner = await db(`members/${partnerOf(from)}`);
-      if (!partner?.push_token) return reply(200, { sent: false, reason: 'partner has no push token' });
+      // 對方的所有手機（每支手機在 devices/{uid} 記著自己的身分和推播位址）
+      const partnerRole = partnerOf(from);
+      const devices = await firestoreQuery(sa.project_id, google, 'devices', 'role', partnerRole);
+      const legacy = await db(`members/${partnerRole}`); // 舊版存在這裡，相容一下
+      const tokens = [...new Set([...devices.map((d) => d.push_token), legacy?.push_token].filter(Boolean))];
+      if (!tokens.length) return reply(200, { sent: false, reason: 'partner has no push token' });
 
-      const res = await fetch(`https://fcm.googleapis.com/v1/projects/${sa.project_id}/messages:send`, {
-        method: 'POST',
-        headers: { Authorization: `Bearer ${google}`, 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          message: {
-            token: partner.push_token,
-            notification: message,
-            android: { priority: 'high', notification: { channel_id: 'partner' } },
-            data: { collection },
-          },
-        }),
-      });
-      if (!res.ok) return reply(502, { error: 'fcm', detail: await res.text() });
-      return reply(200, { sent: true });
+      let sent = 0;
+      for (const token of tokens) {
+        const res = await fetch(`https://fcm.googleapis.com/v1/projects/${sa.project_id}/messages:send`, {
+          method: 'POST',
+          headers: { Authorization: `Bearer ${google}`, 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            message: {
+              token,
+              notification: message,
+              android: { priority: 'high', notification: { channel_id: 'partner' } },
+              data: { collection },
+            },
+          }),
+        });
+        if (res.ok) sent++;
+      }
+      return reply(200, { sent: sent > 0, devices: tokens.length, delivered: sent });
     } catch (e) {
       return reply(500, { error: e.message });
     }
@@ -96,6 +103,28 @@ async function firestoreGet(projectId, token, path) {
   return Object.fromEntries(
     Object.entries(fields).map(([k, v]) => [k, v.stringValue ?? v.booleanValue ?? v.integerValue ?? v.timestampValue ?? null]),
   );
+}
+
+/** 查 spaces/home/{collection} 裡 field == value 的文件 */
+async function firestoreQuery(projectId, token, collection, field, value) {
+  const res = await fetch(
+    `https://firestore.googleapis.com/v1/projects/${projectId}/databases/(default)/documents/spaces/home:runQuery`,
+    {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        structuredQuery: {
+          from: [{ collectionId: collection }],
+          where: { fieldFilter: { field: { fieldPath: field }, op: 'EQUAL', value: { stringValue: value } } },
+        },
+      }),
+    },
+  );
+  if (!res.ok) throw new Error(`firestore query ${res.status}`);
+  const rows = await res.json();
+  return rows.filter((r) => r.document).map((r) => Object.fromEntries(
+    Object.entries(r.document.fields ?? {}).map(([k, v]) => [k, v.stringValue ?? v.booleanValue ?? null]),
+  ));
 }
 
 // ---------- 驗證 App 傳來的 Firebase 登入憑證 ----------

@@ -1,5 +1,5 @@
 import { html, render, useEffect, useMemo, useState } from '../vendor/preact-htm.js';
-import { signIn, isJoined, registerMember, savePushToken } from './firebase.js';
+import { signIn, isJoined, registerMember } from './firebase.js';
 import { setupPush } from './push.js';
 import { observeEvents, observeSettings, withRelationship } from './events.js';
 import { syncReminders } from './reminders.js';
@@ -98,9 +98,7 @@ function App() {
   useEffect(() => { start(); }, []);
 
   function choose(role) {
-    // 切換身分時，把舊身分的推播位址清掉，免得通知送回自己這支手機
-    const old = loadRole();
-    if (old && old !== role) savePushToken(old, null).catch(() => {});
+    // 推播位址跟著「這支手機」走（devices/{uid}），換身分只會改這支手機的身分，不會動到對方
     saveRole(role);
     setMe(role);
     registerMember(role).catch(() => {});
