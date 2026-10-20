@@ -74,10 +74,21 @@ export default {
   },
 };
 
+// 愛心種類的推播文字（id 要和 web/js/hearts.js 一致；舊版沒有 kind 的當成 miss）
+const HEART_TEXT = {
+  miss: (n) => ({ title: `${n} 想你了 💕`, body: '傳了一顆愛心給你' }),
+  morning: (n) => ({ title: `${n}：早安 ☀️`, body: '' }),
+  night: (n) => ({ title: `${n}：晚安 🌙`, body: '' }),
+  hug: (n) => ({ title: `${n} 給你一個抱抱 🤗`, body: '' }),
+  arrived: (n) => ({ title: `${n}：我到了／到家了 📍`, body: '' }),
+  eat: (n) => ({ title: `${n}：吃飯了沒？🍱`, body: '' }),
+};
+
 function buildMessage(collection, data, name) {
   switch (collection) {
     case 'pings':
-      return { title: `${name} 想你了 💕`, body: '傳了一顆愛心給你' };
+      if (data.kind === 'text') return { title: `${name} 💬`, body: String(data.text || '').slice(0, 100) };
+      return (HEART_TEXT[data.kind] ?? HEART_TEXT.miss)(name);
     case 'events':
       return data.type === 'anniversary'
         ? { title: `${name} 新增了紀念日 ❤️`, body: data.title || '' }

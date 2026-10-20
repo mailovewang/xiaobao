@@ -134,7 +134,7 @@ function EventForm({ me, ev, defaultDate, onClose }) {
     <div class="sheet-backdrop" onClick=${onClose}>
       <form class="sheet" onClick=${(e) => e.stopPropagation()} onSubmit=${save}>
         <h2>${isNew ? '新增' : readOnly ? '查看' : '編輯'}</h2>
-        ${ev.virtual && html`<p class="hint">交往紀念日請到「更多 → 交往起始日」修改</p>`}
+        ${ev.virtual && html`<p class="hint">這是依交往起始日自動算出來的，要改請到「更多 → 交往起始日」</p>`}
         ${readOnly && !ev.virtual && html`<p class="hint">這是${ROLES[ev.owner]?.name}的行程，只有${ROLES[ev.owner]?.name}能修改</p>`}
 
         ${isNew && html`

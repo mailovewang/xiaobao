@@ -38,3 +38,35 @@ export function extractUrl(text) {
   const m = (text || '').match(/https?:\/\/[^\s]+/);
   return m ? safeUrl(m[0]) : '';
 }
+
+/** 是 Google 地圖的連結嗎？ */
+export function isMapUrl(url) {
+  try {
+    const u = new URL(url);
+    return u.hostname === 'maps.app.goo.gl' || u.hostname.startsWith('maps.google.')
+      || (u.hostname.endsWith('google.com') && u.pathname.startsWith('/maps'))
+      || (u.hostname === 'goo.gl' && u.pathname.startsWith('/maps'));
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * 分享進來的文字 → 新增表單的預設值。
+ * Google 地圖分享通常是「店名\n地址\nhttps://maps.app.goo.gl/...」，順便抓店名。
+ */
+export function parseShared(text) {
+  const url = extractUrl(text);
+  if (!url) return null;
+  if (!isMapUrl(url)) return { ig_url: url };
+  const before = text.slice(0, text.indexOf('http')).split('\n').map((s) => s.trim()).filter(Boolean)[0] ?? '';
+  return { map_url: url, name: before.replace(/[,，]\s*$/, '') };
+}
+
+/** 導航用的地圖網址：有貼地圖連結就用它，沒有就用「店名 地區」搜尋 */
+export function mapLinkOf(place) {
+  const own = safeUrl(place.map_url || '');
+  if (own) return own;
+  const q = [place.name, place.area].filter(Boolean).join(' ');
+  return q ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(q)}` : '';
+}

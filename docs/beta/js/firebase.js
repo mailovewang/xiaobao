@@ -85,15 +85,6 @@ export async function notifyPartner(collection, id, action = 'created') {
   return res.json();
 }
 
-/** 傳一顆愛心給對方。 */
-export async function sendPing(fromRoleId) {
-  const ref = await fs.addDoc(fs.collection(db, 'spaces', 'home', 'pings'), {
-    created_by: fromRoleId,
-    created_at: fs.serverTimestamp(),
-  });
-  return notifyPartner('pings', ref.id);
-}
-
 /** 即時監聽誰已經加入。回傳取消監聽的函式。 */
 export function observeMembers(callback) {
   return fs.onSnapshot(fs.collection(db, 'spaces', 'home', 'members'), (snap) => {
