@@ -1,6 +1,7 @@
 import { html, useEffect, useState } from '../../vendor/preact-htm.js';
 import { observeMembers } from '../firebase.js';
-import { HEARTS, heartText, observeTodayHearts, sendHeart } from '../hearts.js';
+import { HEARTS, catchHeart, heartText, observeTodayHearts, sendHeart } from '../hearts.js';
+import { MonthCard, useMonthlyCard } from './monthly.js';
 
 const fmtTime = (ts) => {
   const d = ts?.toDate?.();
@@ -43,7 +44,8 @@ export function HomeScreen({ me, pushState, events, courses, todos, settings, on
   const [hearts, setHearts] = useState([]);
   const [text, setText] = useState('');
   useEffect(() => observeTodayHearts(setHearts), []);
-  const received = hearts.filter((h) => h.created_by === partner.id).slice(0, 3);
+  const recent = hearts.slice(0, 5); // 今天最近 5 顆（兩個方向都算）
+  const [lastMonth, dismissMonth] = useMonthlyCard();
 
   async function send(kind, msg = '') {
     setSent('傳送中…');
@@ -72,6 +74,8 @@ export function HomeScreen({ me, pushState, events, courses, todos, settings, on
               : `❤️ ${upcoming.ev.title}${upcoming.next.years > 0 ? `（${upcoming.next.years} 週年）` : ''}還有 ${daysBetween(today, upcoming.next.date)} 天`}
           </div>`}
       </div>
+
+      ${lastMonth && html`<${MonthCard} month=${lastMonth} onClose=${dismissMonth} />`}
 
       <h2 class="day-title">今天</h2>
       ${todayItems.length === 0 && html`<p class="hint">今天沒有安排</p>`}
@@ -106,9 +110,20 @@ export function HomeScreen({ me, pushState, events, courses, todos, settings, on
           <button class="btn" disabled=${!text.trim()}>傳送</button>
         </form>
         ${sent && html`<p class="hint" style="text-align:center;margin:0">${sent}</p>`}
-        ${received.length > 0 && html`
+        ${recent.length > 0 && html`
           <div class="received">
-            ${received.map((h) => html`<div><b>${partner.name}</b> ${fmtTime(h.created_at)}　${heartText(h)}</div>`)}
+            ${recent.map((h) => {
+              const mine = h.created_by === me;
+              return html`
+                <div class="heart-row">
+                  <span><b class=${h.created_by}>${mine ? '我' : partner.name}</b> ${fmtTime(h.created_at)}　${heartText(h)}</span>
+                  ${h.caught_by
+                    ? html`<span class="caught">🤲 ${mine ? `${partner.name}接住了` : '已接住'}</span>`
+                    : mine
+                      ? html`<span class="caught waiting">還沒接住</span>`
+                      : html`<button class="catch-btn" onClick=${() => catchHeart(h, me).catch(() => {})}>🤲 接住</button>`}
+                </div>`;
+            })}
           </div>`}
       </div>
 

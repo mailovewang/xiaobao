@@ -36,14 +36,17 @@ export default {
       if (!(await db(`devices/${uid}`))) return reply(403, { error: 'not joined' });
 
       const doc = await db(`${collection}/${id}`);
-      // 「完成待辦」由完成的人發出，其他都由新增的人發出
+      // 「完成待辦」由完成的人發出、「接住愛心」由接住的人發出，其他都由新增的人發出
       const done = action === 'done' && collection === 'todos';
-      const from = done ? doc?.done_by : doc?.created_by;
+      const caught = action === 'caught' && collection === 'pings';
+      const from = done ? doc?.done_by : caught ? doc?.caught_by : doc?.created_by;
       if (!NAMES[from] || (done && !doc.done)) return reply(404, { error: 'no such doc' });
 
       const message = done
         ? { title: `${NAMES[from]} 完成了你交代的事 ✅`, body: doc.title || '' }
-        : buildMessage(collection, doc, NAMES[from]);
+        : caught
+          ? { title: `${NAMES[from]} 接住了你的${HEART_LABEL[doc.kind] ?? '愛心'} 🤲`, body: doc.kind === 'text' ? String(doc.text || '').slice(0, 100) : '' }
+          : buildMessage(collection, doc, NAMES[from]);
       // 對方的所有手機（每支手機在 devices/{uid} 記著自己的身分和推播位址）
       const partnerRole = partnerOf(from);
       const devices = await firestoreQuery(sa.project_id, google, 'devices', 'role', partnerRole);
@@ -83,6 +86,8 @@ const HEART_TEXT = {
   arrived: (n) => ({ title: `${n}：我到了／到家了 📍`, body: '' }),
   eat: (n) => ({ title: `${n}：吃飯了沒？🍱`, body: '' }),
 };
+
+const HEART_LABEL = { miss: '想你', morning: '早安', night: '晚安', hug: '抱抱', arrived: '我到了', eat: '吃飯了沒', text: '訊息' };
 
 function buildMessage(collection, data, name) {
   switch (collection) {

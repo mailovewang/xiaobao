@@ -37,3 +37,24 @@ export function observeTodayHearts(callback) {
 
 /** 顯示用的文字 */
 export const heartText = (p) => (p.kind === 'text' ? `💬 ${p.text}` : `${heartOf(p.kind).emoji} ${heartOf(p.kind).label}`);
+
+/** 接住對方的愛心（對方會收到「接住了」的推播） */
+export async function catchHeart(ping, me) {
+  await fs.updateDoc(fs.doc(pingsCol(), ping.id), { caught_by: me, caught_at: fs.serverTimestamp() });
+  notifyPartner('pings', ping.id, 'caught').catch(() => {});
+}
+
+/** 某段時間的所有愛心（每月回顧用） */
+export async function heartsBetween(start, end) {
+  const q = fs.query(pingsCol(),
+    fs.where('created_at', '>=', fs.Timestamp.fromDate(start)),
+    fs.where('created_at', '<', fs.Timestamp.fromDate(end)));
+  return (await fs.getDocs(q)).docs.map((d) => ({ id: d.id, ...d.data() }));
+}
+
+/** 最早的一顆愛心是哪個月（'YYYY-MM'），還沒有就回傳 null */
+export async function firstHeartMonth() {
+  const q = fs.query(pingsCol(), fs.orderBy('created_at'), fs.limit(1));
+  const d = (await fs.getDocs(q)).docs[0]?.data().created_at?.toDate();
+  return d ? `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}` : null;
+}

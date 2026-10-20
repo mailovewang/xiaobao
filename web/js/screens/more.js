@@ -1,4 +1,6 @@
-import { html, useState } from '../../vendor/preact-htm.js';
+import { html, useEffect, useState } from '../../vendor/preact-htm.js';
+import { firstHeartMonth } from '../hearts.js';
+import { MonthCard, monthKey, monthLabel } from './monthly.js';
 import { saveRelationshipStart } from '../events.js';
 import { lock } from '../pin.js';
 import { ROLES, partnerOf } from '../roles.js';
@@ -44,6 +46,9 @@ export function MoreScreen({ me, settings, onSwitchRole }) {
   if (page === 'secrets') {
     return html`${bar('🎁 私密清單')}<${PinGate} me=${me}><${SecretsScreen} me=${me} /></${PinGate}>`;
   }
+  if (page === 'monthly') {
+    return html`${bar('📊 每月回顧')}<${MonthlyList} />`;
+  }
   if (page === 'switch') {
     return html`${bar('🔄 切換身分')}<${PinGate} me=${partnerOf(me)} mode="verify" onDone=${onSwitchRole} />`;
   }
@@ -58,6 +63,7 @@ export function MoreScreen({ me, settings, onSwitchRole }) {
       <div class="list">
         <button class="list-item" onClick=${() => setPage('ledger')}>💰 個人記帳<small>只有自己看得到，需要 PIN</small></button>
         <button class="list-item" onClick=${() => setPage('secrets')}>🎁 私密清單<small>驚喜、禮物、想法，只有自己看得到</small></button>
+        <button class="list-item" onClick=${() => setPage('monthly')}>📊 每月回顧<small>每個月一起傳了多少愛心</small></button>
       </div>
       <div class="list">
         <button class="list-item" onClick=${() => setEditingStart(true)}>
@@ -69,6 +75,31 @@ export function MoreScreen({ me, settings, onSwitchRole }) {
       ${toast && html`<p class="hint" style="text-align:center">✅ ${toast}</p>`}
       <p class="version" onClick=${tapVersion}>版本 ${VERSION}${isBeta ? '（測試版）' : ''}</p>
       ${editingStart && html`<${StartForm} value=${settings.relationship_start} onClose=${() => setEditingStart(false)} />`}
+    </div>
+  `;
+}
+
+/** 從第一顆愛心那個月到這個月，新的在上面 */
+function MonthlyList() {
+  const [months, setMonths] = useState(null);
+  useEffect(() => {
+    firstHeartMonth().then((first) => {
+      if (!first) return setMonths([]);
+      const list = [];
+      const now = new Date();
+      for (let d = new Date(now.getFullYear(), now.getMonth(), 1); monthKey(d) >= first; d.setMonth(d.getMonth() - 1)) {
+        list.push(monthKey(d));
+      }
+      setMonths(list);
+    }).catch(() => setMonths([]));
+  }, []);
+  const current = monthKey(new Date());
+
+  return html`
+    <div class="page">
+      ${months === null && html`<p class="hint">整理中…</p>`}
+      ${months?.length === 0 && html`<p class="hint">還沒有愛心紀錄，從首頁傳一顆吧 💌</p>`}
+      ${months?.map((m) => html`<${MonthCard} month=${m} title=${m === current ? `📊 ${monthLabel(m)}的我們（進行中）` : undefined} />`)}
     </div>
   `;
 }
