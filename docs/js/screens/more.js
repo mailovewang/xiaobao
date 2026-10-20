@@ -17,10 +17,21 @@ export function MoreScreen({ me, settings, onSwitchRole }) {
     const other = ROLES[partnerOf(me)].name;
     if (!confirm(`要從「${ROLES[me].name}」換成「${other}」嗎？`)) return;
     lock();
-    onSwitchRole();
+    setPage('switch'); // 對方設過 PIN 的話，要先輸入對方的 PIN
   }
 
   const back = () => setPage(null);
+
+  // 連點版本號 5 下：切換測試版（給麥麥先試新功能用）
+  const isBeta = location.pathname.includes('/beta/');
+  const [taps, setTaps] = useState(0);
+  function tapVersion() {
+    if (taps + 1 < 5) return setTaps(taps + 1);
+    setTaps(0);
+    if (!confirm(isBeta ? '要切回正式版嗎？' : '要切到測試版嗎？（會先看到還沒正式發布的新功能）')) return;
+    try { localStorage.setItem('channel', isBeta ? 'stable' : 'beta'); } catch {}
+    location.replace(isBeta ? '../' : 'beta/');
+  }
   const bar = (title) => html`
     <div class="subpage-bar">
       <button class="icon-btn" onClick=${back}>‹</button>
@@ -32,6 +43,9 @@ export function MoreScreen({ me, settings, onSwitchRole }) {
   }
   if (page === 'secrets') {
     return html`${bar('🎁 私密清單')}<${PinGate} me=${me}><${SecretsScreen} me=${me} /></${PinGate}>`;
+  }
+  if (page === 'switch') {
+    return html`${bar('🔄 切換身分')}<${PinGate} me=${partnerOf(me)} mode="verify" onDone=${onSwitchRole} />`;
   }
   if (page === 'change-pin') {
     return html`${bar('🔒 更改 PIN')}<${PinGate} me=${me} mode="change"
@@ -53,7 +67,7 @@ export function MoreScreen({ me, settings, onSwitchRole }) {
         <button class="list-item" onClick=${switchRole}>🔄 切換身分<small>目前是 ${ROLES[me].name}</small></button>
       </div>
       ${toast && html`<p class="hint" style="text-align:center">✅ ${toast}</p>`}
-      <p class="version">版本 ${VERSION}</p>
+      <p class="version" onClick=${tapVersion}>版本 ${VERSION}${isBeta ? '（測試版）' : ''}</p>
       ${editingStart && html`<${StartForm} value=${settings.relationship_start} onClose=${() => setEditingStart(false)} />`}
     </div>
   `;

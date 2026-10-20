@@ -40,27 +40,36 @@ function PinPad({ title, hint, onComplete }) {
 /**
  * 上鎖的頁面：沒設過 PIN 就先設定，設過就要輸入，對了才顯示 children。
  * mode='change' 用來更改 PIN。
+ * mode='verify' 用來確認「你真的是 me」（例如切換成這個身分）：沒設過 PIN 就直接通過，不會幫對方設 PIN。
  */
 export function PinGate({ me, mode = 'unlock', onDone, children }) {
-  const [step, setStep] = useState(isUnlocked(me) && mode === 'unlock' ? 'open' : 'loading');
+  const [step, setStep] = useState(isUnlocked(me) && mode !== 'change' ? 'pass' : 'loading');
   const [first, setFirst] = useState('');
 
   useEffect(() => {
+    if (step === 'pass') { if (mode === 'verify') onDone?.(); else setStep('open'); return; }
     if (step !== 'loading') return;
-    hasPin(me).then((has) => setStep(has ? 'enter' : 'new')).catch(() => setStep('enter'));
+    hasPin(me)
+      .then((has) => {
+        if (!has && mode === 'verify') return onDone?.();
+        setStep(has ? 'enter' : 'new');
+      })
+      .catch(() => setStep('enter'));
   }, []);
 
   if (step === 'open') return children;
-  if (step === 'loading') return html`<div class="center"><div class="spinner"></div></div>`;
+  if (step === 'loading' || step === 'pass') return html`<div class="center"><div class="spinner"></div></div>`;
 
   if (step === 'enter') {
+    const name = ROLES[me].name;
     return html`<${PinPad}
-      title=${mode === 'change' ? '請輸入目前的 PIN' : `${ROLES[me].name}的 PIN`}
-      hint=${mode === 'change' ? '' : '記帳和私密清單需要 PIN 才能打開'}
+      title=${mode === 'change' ? '請輸入目前的 PIN' : `${name}的 PIN`}
+      hint=${mode === 'change' ? '' : mode === 'verify' ? `要用「${name}」的身分，請輸入${name}的 PIN` : '記帳和私密清單需要 PIN 才能打開'}
       onComplete=${async (code) => {
         if (!(await checkPin(me, code))) return 'PIN 不對 🙅';
         unlock(me);
         if (mode === 'change') setStep('new');
+        else if (mode === 'verify') onDone?.();
         else { setStep('open'); onDone?.(); }
       }} />`;
   }

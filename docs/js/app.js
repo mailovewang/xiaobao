@@ -16,6 +16,7 @@ import { loadRole, saveRole, partnerOf } from './roles.js';
 import { JoinScreen, RoleScreen } from './screens/setup.js';
 import { HomeScreen } from './screens/home.js';
 import { MoreScreen } from './screens/more.js';
+import { PinGate } from './screens/pin.js';
 
 const TABS = [
   { id: 'home', label: '首頁', icon: '🏠' },
@@ -79,6 +80,7 @@ function App() {
   const [phase, setPhase] = useState('loading');
   const [error, setError] = useState('');
   const [me, setMe] = useState(loadRole());
+  const [pending, setPending] = useState(null);
 
   async function start() {
     setPhase('loading');
@@ -118,7 +120,12 @@ function App() {
     case 'join':
       return html`<${JoinScreen} onJoined=${() => (loadRole() ? choose(loadRole()) : setPhase('role'))} />`;
     case 'role':
-      return html`<${RoleScreen} onSelect=${choose} />`;
+      return html`<${RoleScreen} onSelect=${(role) => { setPending(role); setPhase('verify'); }} />`;
+    case 'verify':
+      // 選的身分設過 PIN 的話要先輸入（沒設過就直接通過）
+      return html`
+        <div class="subpage-bar"><button class="icon-btn" onClick=${() => setPhase('role')}>‹</button><h1>確認身分</h1></div>
+        <${PinGate} me=${pending} mode="verify" onDone=${() => choose(pending)} />`;
     default:
       return html`<${Main} me=${me} onSwitchRole=${() => choose(partnerOf(me))} />`;
   }

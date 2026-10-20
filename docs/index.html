@@ -5,6 +5,18 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="theme-color" content="#f06292">
   <title>小寶</title>
+  <script>
+    // 測試版：在「更多」連點版本號 5 下切換。開了的手機會載入 beta/，其他人不受影響
+    (function () {
+      try {
+        if (location.hostname === 'localhost') return;
+        var wantBeta = localStorage.getItem('channel') === 'beta';
+        var inBeta = location.pathname.indexOf('/beta/') >= 0;
+        if (wantBeta && !inBeta) location.replace('beta/');
+        else if (!wantBeta && inBeta) location.replace('../');
+      } catch (e) {}
+    })();
+  </script>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -34,6 +46,10 @@
       });
       setTimeout(show, 15000);
     })();
+  </script>
+  <script>
+    // 離線也能打開：註冊快取（sw.js）
+    if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(function () {});
   </script>
   <script type="module" src="js/app.js"></script>
 </body>

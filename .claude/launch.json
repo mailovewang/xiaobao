@@ -4,7 +4,7 @@
     {
       "name": "web",
       "runtimeExecutable": "npx.cmd",
-      "runtimeArgs": ["--yes", "http-server@14.1.1", "docs", "-p", "5173", "-c-1", "--silent"],
+      "runtimeArgs": ["--yes", "http-server@14.1.1", "web", "-p", "5173", "-c-1", "--silent"],
       "port": 5173
     }
   ]

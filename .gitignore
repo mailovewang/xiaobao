@@ -30,3 +30,6 @@ firebase/functions/node_modules/
 .secrets/
 .wrangler/
 worker/.dev.vars
+
+# 備份（含金鑰，不上傳）
+backups/
